@@ -42,7 +42,7 @@ spec:
         app.kubernetes.io/name: squad5-pipeline-from-scratch
     spec:
       containers:
-      - image: quay.io/min_ji_gz_ibm/cloudnative:07335635504c7437b29482e8e87fac47df2ab567
+      - image: quay.io/min_ji_gz_ibm/cloudnative:6836b3aaba6b616cae18c1fc646d3d85340fe679
         imagePullPolicy: IfNotPresent
         livenessProbe:
           failureThreshold: 3
