@@ -5,13 +5,13 @@ metadata:
     app: miles-ji-pipeline-from-scratch
     app.kubernetes.io/instance: miles-ji-pipeline-from-scratch
     app.kubernetes.io/name: squad5-pipeline-from-scratch
-  name: caller
+  name: recorder
 spec:
   ports:
   - name: http
     port: 80
     protocol: TCP
-    targetPort: 8080
+    targetPort: 8088
   selector:
     app: miles-ji-pipeline-from-scratch
     app.kubernetes.io/instance: miles-ji-pipeline-from-scratch
@@ -24,9 +24,11 @@ metadata:
     app: miles-ji-pipeline-from-scratch
     app.kubernetes.io/instance: miles-ji-pipeline-from-scratch
     app.kubernetes.io/name: squad5-pipeline-from-scratch
-  name: caller
+  name: recorder
 spec:
+  progressDeadlineSeconds: 600
   replicas: 1
+  revisionHistoryLimit: 10
   selector:
     matchLabels:
       app: miles-ji-pipeline-from-scratch
@@ -40,14 +42,34 @@ spec:
         app.kubernetes.io/name: squad5-pipeline-from-scratch
     spec:
       containers:
-      - image: quay.io/min_ji_gz_ibm/cloudnative:9c4fa94e7fbf6e84d35dedea8288920892e135b6
-        imagePullPolicy: Always
-        name: caller
+      - image: quay.io/min_ji_gz_ibm/cloudnative:07335635504c7437b29482e8e87fac47df2ab567
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 8088
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: recorder
         ports:
-        - containerPort: 8080
+        - containerPort: 8088
           name: http
           protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
         resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -61,12 +83,12 @@ metadata:
     app: miles-ji-pipeline-from-scratch
     app.kubernetes.io/instance: miles-ji-pipeline-from-scratch
     app.kubernetes.io/name: squad5-pipeline-from-scratch
-  name: caller
+  name: recorder
 spec:
   port:
     targetPort: http
   to:
     kind: Service
-    name: caller
+    name: recorder
     weight: 100
   wildcardPolicy: None
